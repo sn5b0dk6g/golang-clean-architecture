@@ -6,11 +6,11 @@ import (
 
 type (
 	TaskRepository interface {
-		FindAll(UserID) (*[]Task, error)
-		FindByID(UserID, taskId uint) (*Task, error)
+		FindAll(userId UserID) (*[]Task, error)
+		FindByID(userId UserID, taskId uint) (*Task, error)
 		Create(task *Task) error
-		Update(task *Task, UserID, taskId uint) error
-		Delete(UserID, taskId uint) error
+		Update(task *Task, userId UserID, taskId uint) error
+		Delete(userId UserID, taskId uint) error
 	}
 
 	Task struct {

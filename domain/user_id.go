@@ -13,6 +13,10 @@ func NewUserID() *UserID {
 	return &UserID{userID: NewUUID()}
 }
 
+func UserIDWithArg(id string) *UserID {
+	return &UserID{id}
+}
+
 func (u UserID) String() string {
 	return u.userID
 }

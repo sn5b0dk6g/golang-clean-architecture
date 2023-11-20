@@ -46,7 +46,7 @@ func NewCreateUserInteractor(
 func (u CreateUserInteractor) Execute(input CreateUserInput) (CreateUserOutput, error) {
 	password, err := domain.NewPassword(input.Password)
 	if err != nil {
-		return CreateUserOutput{}, err
+		return u.presenter.Output(domain.User{}), err
 	}
 
 	strings.Split(input.Email, " ")
@@ -58,7 +58,7 @@ func (u CreateUserInteractor) Execute(input CreateUserInput) (CreateUserOutput, 
 	}
 
 	if err := u.userRepo.Create(&user); err != nil {
-		return CreateUserOutput{}, err
+		return u.presenter.Output(domain.User{}), err
 	}
 
 	return u.presenter.Output(user), nil
