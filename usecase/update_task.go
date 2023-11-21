@@ -1,6 +1,10 @@
 package usecase
 
-import "go-rest-api/domain"
+import (
+	"go-rest-api/domain"
+
+	validation "github.com/go-ozzo/ozzo-validation/v4"
+)
 
 type (
 	UpdateTaskInput struct {
@@ -49,4 +53,14 @@ func (t UpdateTaskInteractor) Execute(input UpdateTaskInput) (UpdateTaskOutput, 
 		return t.presenter.Output(domain.Task{}), err
 	}
 	return t.presenter.Output(task), nil
+}
+
+func (v UpdateTaskInput) Validate() error {
+	return validation.ValidateStruct(&v,
+		validation.Field(
+			&v.Title,
+			validation.Required.Error("title is required"),
+			validation.RuneLength(1, 30).Error("limited max 30 char"),
+		),
+	)
 }

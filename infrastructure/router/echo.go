@@ -5,6 +5,7 @@ import (
 	"go-rest-api/adapter/logger"
 	"go-rest-api/adapter/validator"
 	"go-rest-api/utility"
+	"net/http"
 	"os"
 	"time"
 
@@ -55,6 +56,19 @@ func (e echoServer) Listen() {
 	//e.router.Use(middleware.Logger())
 	e.router.Use(middleware.Recover())
 	e.router.Use(middleware.RequestLoggerWithConfig(e.getRequestLoggerWithConfig()))
+	e.router.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins: []string{"http://localhost:3000", os.Getenv("FE_URL")},
+		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept,
+			echo.HeaderAccessControlAllowHeaders, echo.HeaderXCSRFToken},
+		AllowMethods:     []string{"GET", "PUT", "POST", "DELETE"},
+		AllowCredentials: true,
+	}))
+	e.router.Use(middleware.CSRFWithConfig(middleware.CSRFConfig{
+		CookiePath:     "/",
+		CookieDomain:   os.Getenv("API_DOMAIN"),
+		CookieHTTPOnly: true,
+		CookieSameSite: http.SameSiteDefaultMode,
+	}))
 
 	// ログレベルの変更
 	if l, ok := e.router.Logger.(*log.Logger); ok {

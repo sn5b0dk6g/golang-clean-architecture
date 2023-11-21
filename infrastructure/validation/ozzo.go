@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"go-rest-api/adapter/validator"
 
-	validation "github.com/go-ozzo/ozzo-validation"
+	validation "github.com/go-ozzo/ozzo-validation/v4"
 )
 
 type ozzo struct {

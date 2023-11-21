@@ -43,6 +43,10 @@ func (t CreateTaskAction) Execute(c echo.Context) error {
 	userId := utility.GetUserIdByToken(c)
 	input.UserID = userId
 
+	if errs := t.validateInput(input); errs != nil {
+		return response.NewErrorMessage(errs, http.StatusInternalServerError).SendJSON(c)
+	}
+
 	output, err := t.uc.Execute(input)
 	if err != nil {
 		logging.NewError(t.log, err, t.logKey, http.StatusInternalServerError).Log(t.logMsg)
@@ -52,4 +56,12 @@ func (t CreateTaskAction) Execute(c echo.Context) error {
 	logging.NewInfo(t.log, t.logKey, http.StatusCreated).Log(t.logMsg)
 
 	return c.JSON(http.StatusCreated, output)
+}
+
+func (u CreateTaskAction) validateInput(input usecase.CreateTaskInput) []string {
+	var errs []string
+	if err := u.validator.Validate(input); err != nil {
+		errs = u.validator.Messages()
+	}
+	return errs
 }

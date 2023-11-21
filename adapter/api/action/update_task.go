@@ -51,6 +51,10 @@ func (t UpdateTaskAction) Execute(c echo.Context) error {
 	input.TaskID = uint(taskId)
 	input.UserID = userId
 
+	if errs := t.validateInput(input); errs != nil {
+		return response.NewErrorMessage(errs, http.StatusInternalServerError).SendJSON(c)
+	}
+
 	output, err := t.uc.Execute(input)
 	if err != nil {
 		logging.NewError(t.log, err, t.logKey, http.StatusInternalServerError).Log(t.logMsg)
@@ -60,4 +64,12 @@ func (t UpdateTaskAction) Execute(c echo.Context) error {
 	logging.NewInfo(t.log, t.logKey, http.StatusOK).Log(t.logMsg)
 
 	return c.JSON(http.StatusOK, output)
+}
+
+func (u UpdateTaskAction) validateInput(input usecase.UpdateTaskInput) []string {
+	var errs []string
+	if err := u.validator.Validate(input); err != nil {
+		errs = u.validator.Messages()
+	}
+	return errs
 }
