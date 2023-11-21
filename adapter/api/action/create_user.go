@@ -35,6 +35,7 @@ func NewCreateUserAction(
 func (u CreateUserAction) Execute(c echo.Context) error {
 	var input usecase.CreateUserInput
 	if err := c.Bind(&input); err != nil {
+		logging.NewError(u.log, err, u.logKey, http.StatusBadRequest).Log(u.logMsg)
 		return c.JSON(http.StatusBadRequest, err.Error())
 	}
 

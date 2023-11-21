@@ -37,6 +37,7 @@ func NewLogoutUserAction(
 func (u LogoutUserAction) Execute(c echo.Context) error {
 	var input usecase.LogoutUserInput
 	if err := c.Bind(&input); err != nil {
+		logging.NewError(u.log, err, u.logKey, http.StatusBadRequest).Log(u.logMsg)
 		return c.JSON(http.StatusBadRequest, err.Error())
 	}
 

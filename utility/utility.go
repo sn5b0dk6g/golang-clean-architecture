@@ -6,6 +6,9 @@ import (
 	"os"
 	"strconv"
 	"time"
+
+	"github.com/golang-jwt/jwt"
+	"github.com/labstack/echo/v4"
 )
 
 func GetRedisExpiration() time.Duration {
@@ -28,4 +31,8 @@ func CreateCookie(value string, exp time.Time) *http.Cookie {
 	cookie.SameSite = http.SameSiteNoneMode
 
 	return cookie
+}
+
+func GetUserIdByToken(c echo.Context) string {
+	return c.Get("user").(*jwt.Token).Claims.(jwt.MapClaims)["user_id"].(string)
 }

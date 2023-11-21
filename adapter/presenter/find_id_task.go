@@ -8,7 +8,7 @@ import (
 
 type findIdTaskPresenter struct{}
 
-func NewFindIdTaskInteractor() usecase.FindIdTaskPresenter {
+func NewFindIdTaskPresenter() usecase.FindIdTaskPresenter {
 	return findIdTaskPresenter{}
 }
 

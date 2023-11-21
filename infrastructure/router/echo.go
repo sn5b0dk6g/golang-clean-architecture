@@ -2,17 +2,13 @@ package router
 
 import (
 	"fmt"
-	"go-rest-api/adapter/api/action"
 	"go-rest-api/adapter/logger"
-	"go-rest-api/adapter/presenter"
-	repositoryNoSQL "go-rest-api/adapter/repository/nosql"
-	repositorySQL "go-rest-api/adapter/repository/sql"
 	"go-rest-api/adapter/validator"
-	"go-rest-api/domain"
-	"go-rest-api/usecase"
 	"go-rest-api/utility"
+	"os"
 	"time"
 
+	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/labstack/gommon/log"
@@ -73,60 +69,21 @@ func (e echoServer) Listen() {
 
 func (e echoServer) setAppHandlers() {
 	v1 := e.router.Group("/v1")
-	v1.POST("/signup", e.buildCreateUserAction())
-	v1.POST("/login", e.buildAuthenticationUserAction())
-	v1.POST("/logout", e.buildLogoutUserAction())
-}
+	v1.POST("/signup", BuildCreateUserAction(e))
+	v1.POST("/login", BuildAuthenticationUserAction(e))
+	v1.POST("/logout", BuildLogoutUserAction(e))
 
-func (e echoServer) buildCreateUserAction() echo.HandlerFunc {
-	return func(c echo.Context) error {
-		var db domain.UserRepository
-		if e.useDB {
-			db = repositorySQL.NewUserSQL(e.dbSQL)
-		} else {
-			db = repositoryNoSQL.NewUserRedis(e.dbNoSQL, e.redisExp)
-		}
-		requestID := c.Response().Header().Get(echo.HeaderXRequestID)
-		rLog := e.log.WithFields(logger.Fields{"id": requestID})
-		var (
-			uc = usecase.NewCreateUserInteractor(
-				db,
-				presenter.NewCreateUserPresenter(),
-			)
-			act = action.NewCreateUserAction(uc, rLog, e.validator)
-		)
-		return act.Execute(c)
-	}
-}
+	tasks := v1.Group("/tasks")
+	tasks.Use(echojwt.WithConfig(echojwt.Config{
+		SigningKey:  []byte(os.Getenv("SECRET")), // 作成したときと同じSECRET
+		TokenLookup: "cookie:token",              // どこに入っているか
+	}))
 
-func (e echoServer) buildAuthenticationUserAction() echo.HandlerFunc {
-	return func(c echo.Context) error {
-		requestID := c.Response().Header().Get(echo.HeaderXRequestID)
-		rLog := e.log.WithFields(logger.Fields{"id": requestID})
-		var (
-			uc = usecase.NewAuthenticationUserInteractor(
-				repositorySQL.NewUserSQL(e.dbSQL),
-				repositoryNoSQL.NewUserRedis(e.dbNoSQL, e.redisExp),
-				presenter.NewAuthenticationUserPresenter(),
-			)
-			act = action.NewAuthenticationUserAction(uc, rLog, e.validator)
-		)
-		return act.Execute(c)
-	}
-}
-
-func (e echoServer) buildLogoutUserAction() echo.HandlerFunc {
-	return func(c echo.Context) error {
-		requestID := c.Response().Header().Get(echo.HeaderXRequestID)
-		rLog := e.log.WithFields(logger.Fields{"id": requestID})
-		var (
-			uc = usecase.NewLogoutUserInteractor(
-				repositoryNoSQL.NewUserRedis(e.dbNoSQL, e.redisExp),
-			)
-			act = action.NewLogoutUserAction(uc, rLog, e.validator)
-		)
-		return act.Execute(c)
-	}
+	tasks.GET("", BuildFindAllTaskAction(e))
+	tasks.GET("/:taskId", BuildFindIdTaskAction(e))
+	tasks.POST("", BuildCreateTaskAction(e))
+	tasks.POST("/:taskId", BuildUpdateTaskAction(e))
+	tasks.DELETE("/:taskId", BuildDeleteTaskAction(e))
 }
 
 func (e echoServer) getRequestLoggerWithConfig() middleware.RequestLoggerConfig {
