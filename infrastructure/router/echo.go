@@ -2,6 +2,7 @@ package router
 
 import (
 	"fmt"
+	"go-rest-api/adapter/api/action"
 	"go-rest-api/adapter/logger"
 	"go-rest-api/adapter/validator"
 	"go-rest-api/utility"
@@ -82,6 +83,7 @@ func (e echoServer) Listen() {
 }
 
 func (e echoServer) setAppHandlers() {
+	e.router.GET("/csrf", e.BuildCsrfTokenAction())
 	v1 := e.router.Group("/v1")
 	v1.POST("/signup", BuildCreateUserAction(e))
 	v1.POST("/login", BuildAuthenticationUserAction(e))
@@ -98,6 +100,15 @@ func (e echoServer) setAppHandlers() {
 	tasks.POST("", BuildCreateTaskAction(e))
 	tasks.POST("/:taskId", BuildUpdateTaskAction(e))
 	tasks.DELETE("/:taskId", BuildDeleteTaskAction(e))
+}
+
+func (e echoServer) BuildCsrfTokenAction() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		requestID := c.Response().Header().Get(echo.HeaderXRequestID)
+		rLog := e.log.WithFields(logger.Fields{"id": requestID})
+		act := action.NewCsrfTokenAction(rLog)
+		return act.Execute(c)
+	}
 }
 
 func (e echoServer) getRequestLoggerWithConfig() middleware.RequestLoggerConfig {

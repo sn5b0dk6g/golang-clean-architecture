@@ -21,8 +21,8 @@ func NewTaskSQL(db *gorm.DB) *TaskSQL {
 }
 
 func (t TaskSQL) FindAll(userId domain.UserID) (*[]domain.Task, error) {
-	tasks := []domain.Task{}
-	err := t.db.Joins("User").Where("user_id=?", userId.String()).Order("created_at").Find(tasks).Error
+	tasks := make([]domain.Task, 0)
+	err := t.db.Joins("User").Where("user_id=?", userId.String()).Order("created_at").Find(&tasks).Error
 	if err != nil {
 		return &tasks, err
 	}
