@@ -1,6 +1,16 @@
 package response
 
-import "github.com/labstack/echo/v4"
+import (
+	"errors"
+
+	"github.com/labstack/echo/v4"
+)
+
+var (
+	ErrParameterInvalid = errors.New("parameter invalid")
+
+	ErrInvalidInput = errors.New("invalid input")
+)
 
 type Error struct {
 	statusCode int

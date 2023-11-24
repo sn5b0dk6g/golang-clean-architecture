@@ -13,7 +13,6 @@ import (
 	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"github.com/labstack/gommon/log"
 	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 )
@@ -72,13 +71,12 @@ func (e echoServer) Listen() {
 	}))
 
 	// ログレベルの変更
-	if l, ok := e.router.Logger.(*log.Logger); ok {
-		l.SetLevel(log.INFO)
-	}
+	// if l, ok := e.router.Logger.(*log.Logger); ok {
+	// 	l.SetLevel(log.INFO)
+	// }
 
 	e.setAppHandlers()
 	e.log.WithFields(logger.Fields{"port": e.port}).Infof("Starting HTTP Server")
-	//e.router.Logger.Infof("Starting HTTP Server Port: %v", e.port)
 	e.log.Fatalln(e.router.Start(fmt.Sprintf(":%v", e.port)))
 }
 
@@ -154,16 +152,3 @@ func (e echoServer) getRequestLoggerWithConfig() middleware.RequestLoggerConfig 
 		},
 	}
 }
-
-// func (e echoServer) getRequestLogAttr(v middleware.RequestLoggerValues) []slog.Attr {
-// 	return []slog.Attr{
-// 		slog.String("id", v.RequestID),
-// 		slog.String("remote_ip", v.RemoteIP),
-// 		slog.String("host", v.Host),
-// 		slog.String("method", v.Method),
-// 		slog.String("uri", v.URI),
-// 		slog.String("user_agent", v.UserAgent),
-// 		slog.Int("status", v.Status),
-// 		slog.String("latency_human", v.Latency.String()),
-// 	}
-// }

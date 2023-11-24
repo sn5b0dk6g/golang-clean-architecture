@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	if os.Getenv("GO_ENV") == "dev" {
+	if os.Getenv("GO_ENV") == "local" {
 		err := godotenv.Load()
 		if err != nil {
 			log.Fatalln(err)

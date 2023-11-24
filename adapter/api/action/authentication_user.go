@@ -37,11 +37,12 @@ func NewAuthenticationUserAction(
 func (u AuthenticationUserAction) Execute(c echo.Context) error {
 	var input usecase.AuthenticationUserInput
 	if err := c.Bind(&input); err != nil {
-		logging.NewError(u.log, err, u.logKey, http.StatusBadRequest).Log(u.logMsg)
+		logging.NewError(u.log, response.ErrParameterInvalid, u.logKey, http.StatusBadRequest).Log(u.logMsg)
 		return c.JSON(http.StatusBadRequest, err.Error())
 	}
 
 	if errs := u.validateInput(input); errs != nil {
+		logging.NewError(u.log, response.ErrInvalidInput, u.logKey, http.StatusInternalServerError).Log(u.logMsg)
 		return response.NewErrorMessage(errs, http.StatusInternalServerError).SendJSON(c)
 	}
 
