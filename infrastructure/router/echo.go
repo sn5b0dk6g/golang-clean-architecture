@@ -60,14 +60,14 @@ func (e echoServer) Listen() {
 		AllowOrigins: []string{"http://localhost:3000", os.Getenv("FE_URL")},
 		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept,
 			echo.HeaderAccessControlAllowHeaders, echo.HeaderXCSRFToken},
-		AllowMethods:     []string{"GET", "PUT", "POST", "DELETE"},
+		AllowMethods:     []string{"GET", "PUT", "POST", "DELETE", "OPTIONS"},
 		AllowCredentials: true,
 	}))
 	e.router.Use(middleware.CSRFWithConfig(middleware.CSRFConfig{
 		CookiePath:     "/",
 		CookieDomain:   os.Getenv("API_DOMAIN"),
 		CookieHTTPOnly: true,
-		CookieSameSite: http.SameSiteDefaultMode,
+		CookieSameSite: http.SameSiteLaxMode,
 	}))
 
 	// ログレベルの変更
@@ -96,7 +96,7 @@ func (e echoServer) setAppHandlers() {
 	tasks.GET("", BuildFindAllTaskAction(e))
 	tasks.GET("/:taskId", BuildFindIdTaskAction(e))
 	tasks.POST("", BuildCreateTaskAction(e))
-	tasks.POST("/:taskId", BuildUpdateTaskAction(e))
+	tasks.PUT("/:taskId", BuildUpdateTaskAction(e))
 	tasks.DELETE("/:taskId", BuildDeleteTaskAction(e))
 }
 

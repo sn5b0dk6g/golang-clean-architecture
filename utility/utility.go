@@ -26,9 +26,7 @@ func CreateCookie(value string, exp time.Time) *http.Cookie {
 	cookie.Expires = exp
 	cookie.Path = "/"
 	cookie.Domain = os.Getenv("API_DOMAIN")
-	if os.Getenv("GO_ENV") != "local" {
-		cookie.Secure = true
-	}
+	cookie.Secure = true
 	cookie.HttpOnly = true
 	cookie.SameSite = http.SameSiteNoneMode
 
